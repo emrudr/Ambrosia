@@ -106,31 +106,65 @@ function AppContent() {
     checkOrders();
   }, [user]);
 
-  // Browser Geolocation Auto-Detection
-  const handleDetectGPS = () => {
-    if (!navigator.geolocation) {
-      alert('Geolocation is not supported by your browser.');
-      return;
-    }
+  // Geolocation Auto-Detection with Backend Fallback
+  const handleDetectGPS = async () => {
     setIsDetectingGPS(true);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
+
+    const fallbackBackend = async () => {
+      try {
+        const res = await systemService.autoDetectGps(userLocation.district);
+        if (res.data && res.data.latitude && res.data.longitude) {
+          setUserLocation((prev) => ({
+            ...prev,
+            district: res.data.district || 'Connaught Place',
+            city: res.data.city || 'Delhi',
+            latitude: parseFloat(res.data.latitude),
+            longitude: parseFloat(res.data.longitude),
+            pincode: res.data.pincode || '110001',
+          }));
+        }
+      } catch (e) {
+        console.error('Backend GPS auto-detect fallback failed:', e);
+      } finally {
         setIsDetectingGPS(false);
-        const { latitude, longitude } = pos.coords;
-        setUserLocation((prev) => ({
-          ...prev,
-          district: 'Live GPS Pin',
-          city: 'Delhi NCR',
-          latitude: parseFloat(latitude.toFixed(4)),
-          longitude: parseFloat(longitude.toFixed(4)),
-        }));
-      },
-      (err) => {
-        setIsDetectingGPS(false);
-        alert('Could not acquire GPS coordinates. Please select a verified district.');
-      },
-      { timeout: 8000 }
-    );
+      }
+    };
+
+    if (navigator.geolocation && (window.isSecureContext || window.location.hostname === 'localhost')) {
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          setIsDetectingGPS(false);
+          const lat = parseFloat(pos.coords.latitude.toFixed(4));
+          const lng = parseFloat(pos.coords.longitude.toFixed(4));
+          try {
+            const cRes = await systemService.getClosestDistrict(lat, lng);
+            const d = cRes.data;
+            setUserLocation((prev) => ({
+              ...prev,
+              district: d?.district || 'Live GPS Pin',
+              city: d?.city || 'Delhi NCR',
+              latitude: lat,
+              longitude: lng,
+              pincode: d?.pincode || prev.pincode,
+            }));
+          } catch (e) {
+            setUserLocation((prev) => ({
+              ...prev,
+              district: 'Live GPS Pin',
+              city: 'Delhi NCR',
+              latitude: lat,
+              longitude: lng,
+            }));
+          }
+        },
+        async () => {
+          await fallbackBackend();
+        },
+        { timeout: 6000 }
+      );
+    } else {
+      await fallbackBackend();
+    }
   };
 
   // Toggle Age Mode

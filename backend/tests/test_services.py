@@ -79,6 +79,12 @@ class AmbrosiaServicesTest(unittest.TestCase):
         has_spirits = any(p.abv > 0.0 for p in adult_prods)
         self.assertTrue(has_spirits)
 
+    def test_closest_district_resolution(self):
+        from app.routers.geo import get_closest_district
+        res = get_closest_district(lat=28.55, lng=77.20)
+        self.assertEqual(res["district"], "Hauz Khas")
+        self.assertLessEqual(res["distance_km"], 1.0)
+
 
 if __name__ == "__main__":
     unittest.main()

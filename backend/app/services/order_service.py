@@ -36,9 +36,22 @@ def create_order(
         )
 
     # 2. Hyper-Local 10km Delivery Boundary Enforcement
+    user_lat = order_in.user_latitude if order_in.user_latitude is not None else order_in.delivery_latitude
+    user_lng = order_in.user_longitude if order_in.user_longitude is not None else order_in.delivery_longitude
+
+    if user_lat is None or user_lng is None:
+        if user and user.latitude is not None and user.longitude is not None:
+            user_lat = user.latitude
+            user_lng = user.longitude
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Delivery coordinates (user_latitude, user_longitude) are required.",
+            )
+
     dist = haversine_distance(
-        order_in.user_latitude,
-        order_in.user_longitude,
+        user_lat,
+        user_lng,
         merchant.latitude,
         merchant.longitude,
     )
@@ -99,8 +112,8 @@ def create_order(
         merchant_id=merchant.id,
         total_amount=total_amount,
         delivery_address=order_in.delivery_address.strip(),
-        user_latitude=order_in.user_latitude,
-        user_longitude=order_in.user_longitude,
+        user_latitude=user_lat,
+        user_longitude=user_lng,
         payment_method=order_in.payment_method,
         status="RECEIVED",
     )

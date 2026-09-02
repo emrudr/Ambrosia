@@ -1,6 +1,24 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+// Determine API base URL:
+// 1. Runtime override via window.__AMBROSIA_API_URL__ (if injected)
+// 2. Build-time override via VITE_API_URL
+// 3. Fallback to '/api/v1' relative path.
+// When deployed on Docker/production, Nginx proxies /api/ to backend:8000.
+// In Vite dev, Vite dev server proxies /api to localhost:8000.
+// This guarantees that regardless of deployment domain, IP, or port,
+// requests NEVER mistakenly target the user's client localhost!
+const getApiBaseUrl = () => {
+  if (typeof window !== 'undefined' && window.__AMBROSIA_API_URL__) {
+    return window.__AMBROSIA_API_URL__.replace(/\/+$/, '');
+  }
+  if (import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL.trim() !== '') {
+    return import.meta.env.VITE_API_URL.replace(/\/+$/, '');
+  }
+  return '/api/v1';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -77,10 +95,14 @@ export const orderService = {
     apiClient.get(`/orders/merchant/${merchantId}`),
 };
 
-// System Services
+// System & Geolocation Services
 export const systemService = {
   getDistricts: () => apiClient.get('/districts'),
   getHealth: () => apiClient.get('/health'),
+  autoDetectGps: (districtHint) =>
+    apiClient.get('/geo/auto-detect', { params: districtHint ? { district_hint: districtHint } : {} }),
+  getClosestDistrict: (lat, lng) =>
+    apiClient.get('/geo/closest-district', { params: { lat, lng } }),
 };
 
 export default apiClient;

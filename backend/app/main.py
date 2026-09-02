@@ -7,6 +7,7 @@ from app.routers.users import router as users_router
 from app.routers.merchants import router as merchants_router
 from app.routers.products import router as products_router
 from app.routers.orders import router as orders_router
+from app.routers.geo import router as geo_router
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -39,6 +40,7 @@ app.include_router(users_router, prefix=settings.API_V1_STR)
 app.include_router(merchants_router, prefix=settings.API_V1_STR)
 app.include_router(products_router, prefix=settings.API_V1_STR)
 app.include_router(orders_router, prefix=settings.API_V1_STR)
+app.include_router(geo_router, prefix=settings.API_V1_STR)
 
 
 @app.get(f"{settings.API_V1_STR}/districts", tags=["Geospatial"])

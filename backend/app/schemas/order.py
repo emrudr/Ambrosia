@@ -26,8 +26,10 @@ class OrderCreate(BaseModel):
     merchant_id: uuid.UUID
     items: List[OrderItemCreate]
     delivery_address: str
-    user_latitude: float
-    user_longitude: float
+    user_latitude: Optional[float] = None
+    user_longitude: Optional[float] = None
+    delivery_latitude: Optional[float] = None
+    delivery_longitude: Optional[float] = None
     payment_method: str = "PAY_ON_DELIVERY"
     user_age: Optional[int] = None
     guest_name: Optional[str] = None
