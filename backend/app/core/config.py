@@ -4,17 +4,22 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "Birthday Wisher API"
+    PROJECT_NAME: str = "Ambrosia Artisanal Spirits & Beverage API"
     API_V1_STR: str = "/api/v1"
     
     # Database
-    DATABASE_URL: str = "postgresql://postgres:postgres@db:5432/birthday_db"
+    DATABASE_URL: str = "postgresql://postgres:postgres@localhost:5432/ambrosia_db"
     
     # Redis
-    REDIS_HOST: str = "redis"
+    REDIS_HOST: str = "localhost"
     REDIS_PORT: int = 6379
     REDIS_PASSWORD: str = ""
     REDIS_SSL: bool = False
+    
+    # Authentication & Security
+    SECRET_KEY: str = "ambrosia_ultra_luxury_secret_jwt_key_98472918471"
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
     
     # CORS (comma-separated origins or ["*"])
     ALLOWED_ORIGINS: Union[str, List[str]] = "http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173"

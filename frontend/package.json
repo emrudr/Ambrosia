@@ -1,5 +1,5 @@
 {
-  "name": "birthday-wisher-frontend",
+  "name": "ambrosia-frontend",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -9,10 +9,18 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "autoprefixer": "^10.5.4",
+    "axios": "^1.20.0",
     "canvas-confetti": "^1.9.3",
+    "clsx": "^2.1.1",
+    "framer-motion": "^11.2.10",
     "lucide-react": "^0.395.0",
+    "postcss": "^8.4.38",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^7.18.3",
+    "tailwind-merge": "^2.3.0",
+    "tailwindcss": "^3.4.4"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",
